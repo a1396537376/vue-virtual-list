@@ -8,7 +8,8 @@
       <div
         ref="items"
         class="view_items"
-        v-for="(item,index) of data"
+        v-for="(item,index) of renderList"
+        :style="{ height: `${itemSize}px`,lineHeight: `${itemSize}px` }"
         :key="index">
         <slot :data="item"></slot>
       </div>    
@@ -31,7 +32,7 @@ export default {
       viewHeight: { type: Number },
       bufferScale: { type: Number, default: 0.5 },
       itemSize: { type: Number, default: 24 },
-      // nomal | dynamic | log
+      // normal | dynamic | log
       pageModel: { type: String, default: 'normal' }
     },
     computed: {
@@ -67,11 +68,33 @@ export default {
         start: 0,
         end: -1,
       };
+    },
+    methods: {
+      initPositions() {
+        this.positions = this.data.map((item,index) => {
+          return {
+            index,
+            height: this.itemSize,
+            top: index * this.itemSize,
+            bottom: (index + 1) * this.itemSize
+          }
+        });
     }
+    },
 }
 </script>
 <style lang="css" scoped>
 .virtual_container {
     overflow: scroll;
+}
+.phantom{
+    position: absolute;
+    z-index: -1;
+    top: 0;
+    left: 0;
+    right: 0;
+}
+.view_content{
+    position: relative;
 }
 </style>
