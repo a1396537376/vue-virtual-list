@@ -8,9 +8,10 @@
       <div
         ref="items"
         class="view_items"
-        v-for="(item,index) of renderList"
-        :style="{ height: `${itemSize}px`,lineHeight: `${itemSize}px` }"
-        :key="index">
+        v-for="item of renderList"
+        :style="{ height: `${pageModel}` === 'dyanmic' ? `${itemSize}px`: 'auto' }"
+        :key="item.index"
+        :id="item._index">
         <slot :data="item"></slot>
       </div>    
     </div>       
@@ -18,11 +19,12 @@
 </template>
 <script>
 /**
-@params scrollTop  滚动高度
-@params listHeight 列表总高度
-@params startIndex 视图渲染的起始索引
-@params endIndex 视图渲染的结束索引
-
+* @param scrollTop  滚动高度
+* @param listHeight 列表总高度
+* @param startIndex 视图渲染的起始索引
+* @param endIndex 视图渲染的结束索引
+* @param renderCount 可显示的列表项数
+* @param startOffset 偏移量
 */
 export default {
     props: {
@@ -33,7 +35,7 @@ export default {
       bufferScale: { type: Number, default: 0.5 },
       itemSize: { type: Number, default: 24 },
       // normal | dynamic | log
-      pageModel: { type: String, default: 'normal' }
+      pageModel: { type: String, default: 'normal' },
     },
     computed: {
       listHeight() {
@@ -59,14 +61,20 @@ export default {
         let start = this.start - this.aboveCount;
         let end = this.end + this.belowCount;
         return this.data.slice(start, end);
-      }
+      },
+    },
+    created() {
+      this.initPositions();
+    },
+    mounted() {
+      this.end = this.start + this.renderCount;
     },
     data() {
       return {
         positions: [],  // all item position info
         startOffset: 0, // view content offset
         start: 0,
-        end: -1,
+        end: 0,
       };
     },
     methods: {
@@ -76,10 +84,11 @@ export default {
             index,
             height: this.itemSize,
             top: index * this.itemSize,
-            bottom: (index + 1) * this.itemSize
+            bottom: (index + 1) * this.itemSize,
+            isUpdate: false,
           }
         });
-    }
+      },
     },
 }
 </script>
